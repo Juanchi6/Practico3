@@ -6,7 +6,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
-| Juice Shop | 3 | 5 |
+| Juice Shop | 4 | 5 |
 | crAPI | 0 | 5 |
 
 ## OWASP Juice Shop
@@ -64,6 +64,23 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 ![Registro con rol admin, HTTP 201 y desafío completado](evidencias/juice-shop/j4-admin-registration.png)
 
 **Mitigación:** asignar roles exclusivamente del lado del servidor, usando una lista permitida de campos de registro y controles de autorización.
+
+### J6 — View Basket
+
+**Vulnerabilidad:** acceso directo a objetos sin verificar autorización (IDOR), permitiendo consultar el carrito de otra cuenta.
+
+**Clasificación:** OWASP Top 10 2021 — A01: Broken Access Control.
+
+**Prueba de concepto:**
+1. Con una cuenta normal, abrí `Your Basket` y localicé `GET /rest/basket/6` en Firefox Network.
+2. Mediante `Edit and Resend`, cambié el identificador a `GET /rest/basket/1` sin modificar la sesión.
+3. El servidor respondió **HTTP 200 OK** y Juice Shop confirmó el desafío *View Basket*.
+
+**Evidencia:**
+
+![Solicitud a carrito ajeno, HTTP 200 y desafío completado](evidencias/juice-shop/j6-view-basket.png)
+
+**Mitigación:** validar en el servidor que el usuario autenticado sea propietario del carrito solicitado, rechazando el acceso a carritos ajenos.
 
 ## OWASP crAPI
 
