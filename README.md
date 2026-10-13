@@ -7,7 +7,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
 | Juice Shop | 5 | 5 |
-| crAPI | 0 | 5 |
+| crAPI | 2 | 5 |
 
 ## OWASP Juice Shop
 
@@ -103,7 +103,41 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 ## OWASP crAPI
 
-_Pendiente._
+### C3 — Get an Item for Free
+
+**Vulnerabilidad:** validación insuficiente de la cantidad comprada. La API acepta valores negativos que invierten el importe de la operación.
+
+**Clasificación:** OWASP API Security Top 10 2023 — API6: Unrestricted Access to Sensitive Business Flows (abuso de la lógica de compra).
+
+**Prueba de concepto:**
+1. Compré un Seat de $10 y capturé `POST /workshop/api/shop/orders` en Firefox Network.
+2. Reenvié la solicitud con `{"product_id":1,"quantity":-1}`; el servidor respondió **HTTP 200**.
+3. En `Past Orders` se registró un Seat con importe **−$10**; el saldo recuperó los $10 de la compra inicial.
+
+**Evidencias:**
+
+![Solicitud con cantidad negativa](evidencias/crapi/c3-quantity-negativa.png)
+
+![Pedido registrado con importe negativo](evidencias/crapi/c3-pedido-negativo.png)
+
+**Mitigación:** validar en el servidor que `quantity` sea un entero positivo y calcular importes exclusivamente con valores permitidos.
+
+### C4 — Increase Balance by $1,000 or More
+
+**Vulnerabilidad:** el mismo defecto de validación permite acreditar importes arbitrarios manipulando la cantidad.
+
+**Clasificación:** OWASP API Security Top 10 2023 — API6: Unrestricted Access to Sensitive Business Flows.
+
+**Prueba de concepto:**
+1. Capturé una compra normal de Seat (`product_id: 1`, precio $10).
+2. Reenvié `POST /workshop/api/shop/orders` con `{"product_id":1,"quantity":-101}`.
+3. El saldo aumentó de **$80 a $1.090**, es decir, **$1.010**.
+
+**Evidencia:**
+
+![Saldo de $1090 tras solicitud con cantidad -101](evidencias/crapi/c4-aumento-saldo.png)
+
+**Mitigación:** rechazar cantidades no positivas y comprobar en el servidor los importes y movimientos de saldo antes de procesar cualquier compra.
 
 ## Entrega
 
