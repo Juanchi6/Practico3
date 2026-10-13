@@ -7,7 +7,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
 | Juice Shop | 5 | 5 |
-| crAPI | 2 | 5 |
+| crAPI | 3 | 5 |
 
 ## OWASP Juice Shop
 
@@ -102,6 +102,23 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Mitigación:** parametrizar las consultas SQL y verificar en el servidor que el producto esté activo tanto al añadirlo al carrito como al confirmar el pedido.
 
 ## OWASP crAPI
+
+### C1 — Find Another User's Vehicle Location
+
+**Vulnerabilidad:** BOLA: falta de autorización por objeto para consultar la ubicación de vehículos ajenos.
+
+**Clasificación:** OWASP API Security Top 10 2023 — API1: Broken Object Level Authorization.
+
+**Prueba de concepto:**
+1. Con mi cuenta, identifiqué la solicitud `GET /identity/api/v2/vehicle/{id}/location` de mi vehículo.
+2. En `Community`, encontré el identificador `author.vehicleId` de un vehículo de otro usuario.
+3. Mediante `Edit and Resend`, sustituí el ID de la URL y conservé la autorización de mi sesión. La API respondió **HTTP 200** y devolvió las coordenadas y datos del otro propietario.
+
+**Evidencia:**
+
+![Ubicación de otro usuario consultada con mi sesión](evidencias/crapi/c1-vehicle-location.png)
+
+**Mitigación:** comprobar en cada petición que el vehículo consultado pertenezca al usuario autenticado o que éste tenga autorización expresa.
 
 ### C3 — Get an Item for Free
 
