@@ -2,13 +2,6 @@
 
 Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local de Kali Linux.
 
-## Avance
-
-| Aplicación | Resueltos | Requeridos |
-| --- | ---: | ---: |
-| Juice Shop | 5 | 5 |
-| crAPI | 4 | 5 |
-
 ## OWASP Juice Shop
 
 ### J1 — Zero Stars
@@ -156,6 +149,23 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 **Mitigación:** rechazar cantidades no positivas y comprobar en el servidor los importes y movimientos de saldo antes de procesar cualquier compra.
 
+### C5 — Server-Side Request Forgery (SSRF)
+
+**Vulnerabilidad:** la función `Contact Mechanic` permite indicar desde el cliente la URL de destino de una solicitud realizada por el servidor.
+
+**Clasificación:** OWASP API Security Top 10 2023 — API7: Server Side Request Forgery.
+
+**Prueba de concepto:**
+1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé `POST /workshop/api/merchant/contact_mechanic` en Firefox Network.
+2. Con `Edit and Resend`, modifiqué únicamente `mechanic_api` para que apuntara a `https://www.google.com`, conservando los demás parámetros y la sesión.
+3. La respuesta devolvió `status: 200` y el campo `response_from_mechanic_api` contenía HTML de Google, comenzando por `<!doctype html>`. Esto evidencia que el backend consultó un destino elegido por el cliente.
+
+**Evidencia:**
+
+![Respuesta del servidor con HTML de Google tras cambiar mechanic_api](evidencias/crapi/c5-ssrf-google.png)
+
+**Mitigación:** limitar los destinos a servicios de mecánicos autorizados mediante una lista permitida; validar esquema, host, resolución DNS y redirecciones, y bloquear acceso a redes internas y servicios de metadatos.
+
 ### C6 — NoSQL Injection: Find Coupons Without Knowing the Code
 
 **Vulnerabilidad:** inyección NoSQL en la validación de cupones. La API acepta un objeto con un operador de consulta en el campo `coupon_code` en lugar de exigir un código de texto.
@@ -176,4 +186,4 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 ## Entrega
 
-Un único ZIP con este `README.md` y las evidencias enlazadas.
+Entregar este documento y las capturas de la carpeta `evidencias/`, manteniendo las rutas relativas para visualizar las pruebas.
