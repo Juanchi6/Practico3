@@ -6,7 +6,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
-| Juice Shop | 4 | 5 |
+| Juice Shop | 5 | 5 |
 | crAPI | 0 | 5 |
 
 ## OWASP Juice Shop
@@ -81,6 +81,25 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 ![Solicitud a carrito ajeno, HTTP 200 y desafío completado](evidencias/juice-shop/j6-view-basket.png)
 
 **Mitigación:** validar en el servidor que el usuario autenticado sea propietario del carrito solicitado, rechazando el acceso a carritos ajenos.
+
+### J7 — Christmas Special
+
+**Vulnerabilidad:** controles insuficientes para impedir la compra de productos eliminados del catálogo.
+
+**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design (reglas de negocio).
+
+**Prueba de concepto:**
+1. Consulté `/rest/products/search?q='))--` y encontré *Christmas Super-Surprise-Box (2014 Edition)*, producto eliminado con `id: 10` y `deletedAt` informado.
+2. Intercepté `POST /api/BasketItems/` desde Firefox Network y reenvié la solicitud con `ProductId: 10`, conservando el carrito de mi cuenta.
+3. El producto apareció en el carrito y completé el checkout; Juice Shop confirmó el desafío *Christmas Special*.
+
+**Evidencias:**
+
+![Producto eliminado con ID 10 y fecha de eliminación](evidencias/juice-shop/j7-christmas-producto.png)
+
+![Confirmación de la compra y desafío Christmas Special resuelto](evidencias/juice-shop/j7-christmas-resultado.png)
+
+**Mitigación:** comprobar del lado del servidor que cada producto siga activo y disponible tanto al añadirlo al carrito como al confirmar el pedido.
 
 ## OWASP crAPI
 
