@@ -7,7 +7,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
 | Juice Shop | 5 | 5 |
-| crAPI | 3 | 5 |
+| crAPI | 4 | 5 |
 
 ## OWASP Juice Shop
 
@@ -155,6 +155,24 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 ![Saldo de $1090 tras solicitud con cantidad -101](evidencias/crapi/c4-aumento-saldo.png)
 
 **Mitigación:** rechazar cantidades no positivas y comprobar en el servidor los importes y movimientos de saldo antes de procesar cualquier compra.
+
+### C6 — NoSQL Injection: Find Coupons Without Knowing the Code
+
+**Vulnerabilidad:** inyección NoSQL en la validación de cupones. La API acepta un objeto con un operador de consulta en el campo `coupon_code` en lugar de exigir un código de texto.
+
+**Clasificación:** OWASP API Security Top 10 2023 — API8: Security Misconfiguration (validación insuficiente de entradas que permite una consulta NoSQL no prevista). También corresponde a la clase general de vulnerabilidades de inyección.
+
+**Prueba de concepto:**
+1. Desde `Shop → Add Coupons`, envié el código inválido `PRUEBA123` e identifiqué la solicitud `POST /community/api/v2/coupon/validate-coupon` en Firefox Network.
+2. Con `Edit and Resend`, sustituí el cuerpo por `{"coupon_code":{"$ne":null}}`, manteniendo la autenticación de mi sesión.
+3. El servidor respondió **HTTP 200** y devolvió un cupón previamente desconocido: `TRAC075`, con `amount: "75"`.
+4. Ingresé `TRAC075` en el formulario normal y la aplicación confirmó **«Success — Coupon applied»**.
+
+**Evidencia:**
+
+![Operador NoSQL, HTTP 200 y cupón obtenido](evidencias/crapi/c6-nosql-cupon.png)
+
+**Mitigación:** verificar del lado del servidor que `coupon_code` sea una cadena de texto con el formato permitido; rechazar objetos y operadores de consulta, y construir las consultas con filtros controlados por el servidor.
 
 ## Entrega
 
