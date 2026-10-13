@@ -117,7 +117,7 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 2. En `Community`, encontré el identificador `author.vehicleId` de un vehículo de otro usuario.
 3. Mediante `Edit and Resend`, sustituí el ID de la URL y conservé la autorización de mi sesión. La API respondió **HTTP 200** y devolvió las coordenadas y datos del otro propietario.
 
-**Evidencia:** la interfaz muestra la cuenta `Usuario Prueba DSS`, mientras que la respuesta contiene coordenadas y los datos del propietario `Robot`. La captura documenta esa respuesta; no muestra la secuencia completa de obtención y sustitución del identificador.
+**Evidencia:** con la sesión de `Usuario Prueba DSS`, la respuesta muestra la ubicación y los datos del vehículo de `Robot`.
 
 ![Respuesta con ubicación y datos de Robot mientras la interfaz muestra Usuario Prueba DSS](evidencias/crapi/c1-vehicle-location.png)
 
@@ -129,13 +129,13 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 
 **Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: falta la regla de negocio que exige cantidades positivas antes de calcular el importe de una compra.
 
-**Variante utilizada:** la consigna describe una devolución de producto. En esta prueba se utilizó una compra con cantidad negativa, variante documentada para el desafío 8 en las [soluciones oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-8---get-an-item-for-free). El procedimiento demuestra la creación de un pedido con importe negativo; no reproduce el flujo de devolución.
+**Aclaración:** aunque la consigna menciona una devolución, se utilizó una compra con cantidad negativa, variante del desafío documentada por crAPI.
 
 **Prueba de concepto:**
 
 1. Compré un Seat de $10 y capturé `POST /workshop/api/shop/orders` en Firefox Network.
 2. Reenvié la solicitud con `{"product_id":1,"quantity":-1}`; el servidor respondió **HTTP 200**.
-3. En `Past Orders` quedó registrado un Seat con importe **−$10**, junto con pedidos de importe positivo. Las capturas muestran la aceptación de la cantidad negativa y su registro como pedido, sin una comparación del saldo antes y después.
+3. En `Past Orders` apareció un pedido de Seat con importe **−$10**. La evidencia prueba que la aplicación aceptó un pedido con importe negativo.
 
 **Evidencias:**
 
@@ -151,15 +151,15 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 
 **Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: el cálculo del movimiento de saldo carece de una validación de las reglas de compra.
 
-**Variante utilizada:** se amplía la prueba de cantidades negativas de C3, siguiendo la variante del desafío 9 en las [soluciones oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-9---increase-your-balance-by-1000-or-more). La operación probada es una compra manipulada, sin utilizar el flujo de devolución mencionado en la consigna.
+**Aclaración:** se usó la misma falla que en C3, aumentando la cantidad negativa. No se utilizó el flujo de devolución mencionado en la consigna.
 
 **Prueba de concepto:**
 
 1. Capturé una compra normal de Seat (`product_id: 1`, precio $10).
 2. Reenvié `POST /workshop/api/shop/orders` con `{"product_id":1,"quantity":-101}`.
-3. Tras la prueba, la interfaz mostró un saldo de **$1.090**. A $10 por unidad, la cantidad `-101` produce un importe de **−$1.010**; al descontar ese importe, el efecto aritmético esperado es un crédito de **$1.010**.
+3. Tras la prueba, la aplicación mostró un saldo de **$1.090**. Una cantidad de `-101` a $10 genera un importe de **−$1.010**, que se suma al saldo al descontarlo.
 
-**Evidencia:** la captura muestra el saldo final de $1.090 y el cuerpo con `quantity: -101` en el editor de solicitudes. No incluye el saldo previo ni la respuesta de esa operación, por lo que no permite verificar directamente el incremento efectivo de $1.010.
+**Evidencia:** la captura muestra la cantidad `-101` y el saldo final de $1.090; no muestra el saldo anterior.
 
 ![Saldo de $1090 y cuerpo con cantidad -101 en el editor de solicitudes](evidencias/crapi/c4-aumento-saldo.png)
 
@@ -177,7 +177,7 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 2. Con `Edit and Resend`, modifiqué únicamente `mechanic_api` para que apuntara a `https://www.google.com`, conservando los demás parámetros y la sesión.
 3. La respuesta devolvió `status: 200` y el campo `response_from_mechanic_api` contenía HTML de Google, comenzando por `<!doctype html>`. Esto evidencia que el backend consultó un destino elegido por el cliente.
 
-**Evidencia:** se observa la respuesta de `contact_mechanic`, con `status: 200` y HTML de Google en `response_from_mechanic_api`. El campo `mechanic_api` enviado no queda visible en el encuadre de la captura.
+**Evidencia:** la respuesta de `contact_mechanic` muestra `status: 200` y HTML de Google. La URL enviada no aparece en el encuadre.
 
 ![Respuesta de contact_mechanic con status 200 y HTML de Google](evidencias/crapi/c5-ssrf-google.png)
 
@@ -195,7 +195,7 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 2. Con `Edit and Resend`, sustituí el cuerpo por `{"coupon_code":{"$ne":null}}`, manteniendo la autenticación de mi sesión.
 3. El servidor respondió **HTTP 200** y devolvió un cupón previamente desconocido: `TRAC075`, con `amount: "75"`.
 
-**Evidencia:** la solicitud modificada devuelve el cupón `TRAC075`, aunque el formulario conserva el código inválido `PRUEBA123` y su mensaje de error. La prueba documenta la obtención de un cupón sin conocer su código; no se incluye evidencia de su aplicación posterior.
+**Evidencia:** la respuesta a la inyección devuelve `TRAC075`, un código que no habíamos ingresado. La captura no muestra su aplicación posterior.
 
 ![Operador NoSQL, HTTP 200 y cupón obtenido](evidencias/crapi/c6-nosql-cupon.png)
 
