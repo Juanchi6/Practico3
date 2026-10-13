@@ -40,9 +40,11 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 2. Ingresé `admin@juice-sh.op'--` como correo y `prueba123` como contraseña.
 3. El inicio de sesión devolvió **HTTP 200** y Juice Shop confirmó el desafío *Login Admin*.
 
-**Evidencia:** la solicitud de inicio de sesión con el valor ingresado y la respuesta HTTP 200.
+**Evidencias:** solicitud de inicio de sesión con la inyección y respuesta HTTP 200; confirmación visual de Juice Shop de que se resolvió *Login Admin*.
 
 ![Solicitud SQL Injection y HTTP 200](evidencias/juice-shop/j2-login-admin-request.png)
+
+![Confirmación del desafío Login Admin resuelto](evidencias/juice-shop/j2-login-admin-resultado.png)
 
 **Mitigación:** utilizar consultas SQL parametrizadas y validar los datos de entrada; nunca concatenar valores del usuario directamente en una consulta de autenticación.
 
