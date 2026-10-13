@@ -84,13 +84,13 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 ### J7 — Christmas Special
 
-**Vulnerabilidad:** controles insuficientes para impedir la compra de productos eliminados del catálogo.
+**Vulnerabilidad:** la búsqueda permite una SQL Injection que revela productos retirados, y el servidor no comprueba que el producto siga disponible al agregarlo al carrito y comprarlo.
 
-**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design (reglas de negocio).
+**Clasificación:** OWASP Top 10 2021 — A03: Injection (búsqueda) y A04: Insecure Design (validación de disponibilidad del producto).
 
 **Prueba de concepto:**
 1. Consulté `/rest/products/search?q='))--` y encontré *Christmas Super-Surprise-Box (2014 Edition)*, producto eliminado con `id: 10` y `deletedAt` informado.
-2. Intercepté `POST /api/BasketItems/` desde Firefox Network y reenvié la solicitud con `ProductId: 10`, conservando el carrito de mi cuenta.
+2. Capturé `POST /api/BasketItems/` en Firefox Network y reenvié la solicitud con `ProductId: 10`, conservando el carrito de mi cuenta.
 3. El producto apareció en el carrito y completé el checkout; Juice Shop confirmó el desafío *Christmas Special*.
 
 **Evidencias:**
@@ -99,7 +99,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 ![Confirmación de la compra y desafío Christmas Special resuelto](evidencias/juice-shop/j7-christmas-resultado.png)
 
-**Mitigación:** comprobar del lado del servidor que cada producto siga activo y disponible tanto al añadirlo al carrito como al confirmar el pedido.
+**Mitigación:** parametrizar las consultas SQL y verificar en el servidor que el producto esté activo tanto al añadirlo al carrito como al confirmar el pedido.
 
 ## OWASP crAPI
 
