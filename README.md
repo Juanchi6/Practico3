@@ -1,6 +1,10 @@
 # Práctico 3 — Desarrollo Seguro de Software
 
-Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local de Kali Linux.
+Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local de Kali Linux, utilizando Firefox Network y `Edit and Resend`. Las capturas corresponden a Juice Shop en `http://localhost:3000` y crAPI en `http://localhost:8888`.
+
+Se seleccionaron cinco desafíos de cada aplicación: J1, J2, J4, J6 y J7 de Juice Shop; C1, C3, C4, C5 y C6 de crAPI. Los identificadores J/C corresponden a la consigna. Cada caso incluye el defecto, su clasificación con la edición de OWASP utilizada, los pasos, la evidencia disponible y una mitigación.
+
+Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al estado del laboratorio y pueden variar en otra instalación.
 
 ## OWASP Juice Shop
 
@@ -8,9 +12,10 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 **Vulnerabilidad:** validación insuficiente del valor de la calificación. El formulario limita los valores disponibles, pero el servidor aceptó una calificación de cero.
 
-**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design (validación de reglas de negocio insuficiente).
+**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: la regla que limita la calificación a 1–5 se aplica en el cliente, pero no se hace cumplir en el servidor.
 
 **Prueba de concepto:**
+
 1. Abrí `Customer Feedback` y envié un comentario con una estrella.
 2. En las herramientas de Firefox (`Network`), identifiqué `POST /api/Feedbacks/`.
 3. Utilicé `Edit and Resend` y cambié `rating: 1` por `rating: 0`, conservando los otros campos.
@@ -29,6 +34,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP Top 10 2021 — A03: Injection.
 
 **Prueba de concepto:**
+
 1. Abrí el formulario `Login`.
 2. Ingresé `admin@juice-sh.op'--` como correo y `prueba123` como contraseña.
 3. El inicio de sesión devolvió **HTTP 200** y Juice Shop confirmó el desafío *Login Admin*.
@@ -48,6 +54,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP Top 10 2021 — A01: Broken Access Control.
 
 **Prueba de concepto:**
+
 1. Registré una cuenta normal y localicé la solicitud `POST /api/Users/` en Firefox Network.
 2. Con `Edit and Resend`, usé otro correo y añadí `"role":"admin"` al JSON.
 3. El servidor respondió **HTTP 201 Created** y Juice Shop confirmó *Admin Registration*.
@@ -65,6 +72,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP Top 10 2021 — A01: Broken Access Control.
 
 **Prueba de concepto:**
+
 1. Con una cuenta normal, abrí `Your Basket` y localicé `GET /rest/basket/6` en Firefox Network.
 2. Mediante `Edit and Resend`, cambié el identificador a `GET /rest/basket/1` sin modificar la sesión.
 3. El servidor respondió **HTTP 200 OK** y Juice Shop confirmó el desafío *View Basket*.
@@ -82,6 +90,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP Top 10 2021 — A03: Injection (búsqueda) y A04: Insecure Design (validación de disponibilidad del producto).
 
 **Prueba de concepto:**
+
 1. Consulté `/rest/products/search?q='))--` y encontré *Christmas Super-Surprise-Box (2014 Edition)*, producto eliminado con `id: 10` y `deletedAt` informado.
 2. Capturé `POST /api/BasketItems/` en Firefox Network y reenvié la solicitud con `ProductId: 10`, conservando el carrito de mi cuenta.
 3. El producto apareció en el carrito y completé el checkout; Juice Shop confirmó el desafío *Christmas Special*.
@@ -103,13 +112,14 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP API Security Top 10 2023 — API1: Broken Object Level Authorization.
 
 **Prueba de concepto:**
+
 1. Con mi cuenta, identifiqué la solicitud `GET /identity/api/v2/vehicle/{id}/location` de mi vehículo.
 2. En `Community`, encontré el identificador `author.vehicleId` de un vehículo de otro usuario.
 3. Mediante `Edit and Resend`, sustituí el ID de la URL y conservé la autorización de mi sesión. La API respondió **HTTP 200** y devolvió las coordenadas y datos del otro propietario.
 
-**Evidencia:**
+**Evidencia:** la interfaz muestra la cuenta `Usuario Prueba DSS`, mientras que la respuesta contiene coordenadas y los datos del propietario `Robot`. La captura documenta esa respuesta; no muestra la secuencia completa de obtención y sustitución del identificador.
 
-![Ubicación de otro usuario consultada con mi sesión](evidencias/crapi/c1-vehicle-location.png)
+![Respuesta con ubicación y datos de Robot mientras la interfaz muestra Usuario Prueba DSS](evidencias/crapi/c1-vehicle-location.png)
 
 **Mitigación:** comprobar en cada petición que el vehículo consultado pertenezca al usuario autenticado o que éste tenga autorización expresa.
 
@@ -117,12 +127,15 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 **Vulnerabilidad:** validación insuficiente de la cantidad comprada. La API acepta valores negativos que invierten el importe de la operación.
 
-**Clasificación:** OWASP API Security Top 10 2023 — API6: Unrestricted Access to Sensitive Business Flows (abuso de la lógica de compra).
+**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: falta la regla de negocio que exige cantidades positivas antes de calcular el importe de una compra.
+
+**Variante utilizada:** la consigna describe una devolución de producto. En esta prueba se utilizó una compra con cantidad negativa, variante documentada para el desafío 8 en las [soluciones oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-8---get-an-item-for-free). El procedimiento demuestra la creación de un pedido con importe negativo; no reproduce el flujo de devolución.
 
 **Prueba de concepto:**
+
 1. Compré un Seat de $10 y capturé `POST /workshop/api/shop/orders` en Firefox Network.
 2. Reenvié la solicitud con `{"product_id":1,"quantity":-1}`; el servidor respondió **HTTP 200**.
-3. En `Past Orders` se registró un Seat con importe **−$10**; el saldo recuperó los $10 de la compra inicial.
+3. En `Past Orders` quedó registrado un Seat con importe **−$10**, junto con pedidos de importe positivo. Las capturas muestran la aceptación de la cantidad negativa y su registro como pedido, sin una comparación del saldo antes y después.
 
 **Evidencias:**
 
@@ -134,18 +147,21 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 ### C4 — Increase Balance by $1,000 or More
 
-**Vulnerabilidad:** el mismo defecto de validación permite acreditar importes arbitrarios manipulando la cantidad.
+**Vulnerabilidad:** el defecto de validación de C3 permite introducir cantidades negativas de mayor magnitud. Al calcular el importe y descontarlo del saldo sin comprobar su signo, el movimiento esperado se convierte en un crédito.
 
-**Clasificación:** OWASP API Security Top 10 2023 — API6: Unrestricted Access to Sensitive Business Flows.
+**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: el cálculo del movimiento de saldo carece de una validación de las reglas de compra.
+
+**Variante utilizada:** se amplía la prueba de cantidades negativas de C3, siguiendo la variante del desafío 9 en las [soluciones oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-9---increase-your-balance-by-1000-or-more). La operación probada es una compra manipulada, sin utilizar el flujo de devolución mencionado en la consigna.
 
 **Prueba de concepto:**
+
 1. Capturé una compra normal de Seat (`product_id: 1`, precio $10).
 2. Reenvié `POST /workshop/api/shop/orders` con `{"product_id":1,"quantity":-101}`.
-3. El saldo aumentó de **$80 a $1.090**, es decir, **$1.010**.
+3. Tras la prueba, la interfaz mostró un saldo de **$1.090**. A $10 por unidad, la cantidad `-101` produce un importe de **−$1.010**; al descontar ese importe, el efecto aritmético esperado es un crédito de **$1.010**.
 
-**Evidencia:**
+**Evidencia:** la captura muestra el saldo final de $1.090 y el cuerpo con `quantity: -101` en el editor de solicitudes. No incluye el saldo previo ni la respuesta de esa operación, por lo que no permite verificar directamente el incremento efectivo de $1.010.
 
-![Saldo de $1090 tras solicitud con cantidad -101](evidencias/crapi/c4-aumento-saldo.png)
+![Saldo de $1090 y cuerpo con cantidad -101 en el editor de solicitudes](evidencias/crapi/c4-aumento-saldo.png)
 
 **Mitigación:** rechazar cantidades no positivas y comprobar en el servidor los importes y movimientos de saldo antes de procesar cualquier compra.
 
@@ -156,13 +172,14 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP API Security Top 10 2023 — API7: Server Side Request Forgery.
 
 **Prueba de concepto:**
-1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé la solicitud `POST contact_mechanic` en Firefox Network.
+
+1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé la solicitud `POST /workshop/api/merchant/contact_mechanic` en Firefox Network.
 2. Con `Edit and Resend`, modifiqué únicamente `mechanic_api` para que apuntara a `https://www.google.com`, conservando los demás parámetros y la sesión.
 3. La respuesta devolvió `status: 200` y el campo `response_from_mechanic_api` contenía HTML de Google, comenzando por `<!doctype html>`. Esto evidencia que el backend consultó un destino elegido por el cliente.
 
-**Evidencia:**
+**Evidencia:** se observa la respuesta de `contact_mechanic`, con `status: 200` y HTML de Google en `response_from_mechanic_api`. El campo `mechanic_api` enviado no queda visible en el encuadre de la captura.
 
-![Respuesta del servidor con HTML de Google tras cambiar mechanic_api](evidencias/crapi/c5-ssrf-google.png)
+![Respuesta de contact_mechanic con status 200 y HTML de Google](evidencias/crapi/c5-ssrf-google.png)
 
 **Mitigación:** limitar los destinos a servicios de mecánicos autorizados mediante una lista permitida; validar esquema, host, resolución DNS y redirecciones, y bloquear acceso a redes internas y servicios de metadatos.
 
@@ -170,20 +187,27 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 **Vulnerabilidad:** inyección NoSQL en la validación de cupones. La API acepta un objeto con un operador de consulta en el campo `coupon_code` en lugar de exigir un código de texto.
 
-**Clasificación:** OWASP API Security Top 10 2023 — API8: Security Misconfiguration (validación insuficiente de entradas que permite una consulta NoSQL no prevista). También corresponde a la clase general de vulnerabilidades de inyección.
+**Clasificación:** OWASP API Security Top 10 2019 — API8: Injection. Se utiliza esta edición porque incluye explícitamente la inyección NoSQL: datos controlados por el cliente se interpretan como parte de una consulta.
 
 **Prueba de concepto:**
+
 1. Desde `Shop → Add Coupons`, envié el código inválido `PRUEBA123` e identifiqué la solicitud `POST /community/api/v2/coupon/validate-coupon` en Firefox Network.
 2. Con `Edit and Resend`, sustituí el cuerpo por `{"coupon_code":{"$ne":null}}`, manteniendo la autenticación de mi sesión.
 3. El servidor respondió **HTTP 200** y devolvió un cupón previamente desconocido: `TRAC075`, con `amount: "75"`.
-4. Ingresé `TRAC075` en el formulario normal y la aplicación confirmó **«Success — Coupon applied»**.
 
-**Evidencia:**
+**Evidencia:** la solicitud modificada devuelve el cupón `TRAC075`, aunque el formulario conserva el código inválido `PRUEBA123` y su mensaje de error. La prueba documenta la obtención de un cupón sin conocer su código; no se incluye evidencia de su aplicación posterior.
 
 ![Operador NoSQL, HTTP 200 y cupón obtenido](evidencias/crapi/c6-nosql-cupon.png)
 
 **Mitigación:** verificar del lado del servidor que `coupon_code` sea una cadena de texto con el formato permitido; rechazar objetos y operadores de consulta, y construir las consultas con filtros controlados por el servidor.
 
+## Referencias
+
+- [Guía oficial de soluciones de OWASP Juice Shop](https://pwning.owasp-juice.shop/companion-guide/latest/appendix/solutions.html): Zero Stars, Login Admin, Admin Registration, View Basket y Christmas Special.
+- [Desafíos oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challenges.md): los casos C1, C3, C4, C5 y C6 de la consigna corresponden a los desafíos oficiales 1, 8, 9, 11 y 12, respectivamente.
+- [OWASP Top 10 2021 — A04: Insecure Design](https://top10.owasp.org/2021/A04_2021-Insecure_Design/): referencia para los defectos de reglas de negocio de J1, J7, C3 y C4.
+- [OWASP API Security Top 10 2019 — API8: Injection](https://api-security.owasp.org/editions/2019/en/0xa8-injection/): referencia para la clasificación de C6.
+
 ## Entrega
 
-Entregar este documento y las capturas de la carpeta `evidencias/`, manteniendo las rutas relativas para visualizar las pruebas.
+Entregar un único archivo ZIP o 7ZIP que contenga este `README.md` y la carpeta `evidencias/`, conservando las rutas relativas para visualizar las trece capturas. También puede entregarse un único informe que incorpore las imágenes, de acuerdo con la consigna.
