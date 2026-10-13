@@ -6,7 +6,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
-| Juice Shop | 2 | 5 |
+| Juice Shop | 3 | 5 |
 | crAPI | 0 | 5 |
 
 ## OWASP Juice Shop
@@ -47,6 +47,23 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 ![Confirmación del desafío Login Admin resuelto](evidencias/juice-shop/j2-login-admin-resultado.png)
 
 **Mitigación:** utilizar consultas SQL parametrizadas y validar los datos de entrada; nunca concatenar valores del usuario directamente en una consulta de autenticación.
+
+### J4 — Admin Registration
+
+**Vulnerabilidad:** asignación indebida de privilegios mediante manipulación del registro de usuarios (Mass Assignment).
+
+**Clasificación:** OWASP Top 10 2021 — A01: Broken Access Control.
+
+**Prueba de concepto:**
+1. Registré una cuenta normal y localicé la solicitud `POST /api/Users/` en Firefox Network.
+2. Con `Edit and Resend`, usé otro correo y añadí `"role":"admin"` al JSON.
+3. El servidor respondió **HTTP 201 Created** y Juice Shop confirmó *Admin Registration*.
+
+**Evidencia:**
+
+![Registro con rol admin, HTTP 201 y desafío completado](evidencias/juice-shop/j4-admin-registration.png)
+
+**Mitigación:** asignar roles exclusivamente del lado del servidor, usando una lista permitida de campos de registro y controles de autorización.
 
 ## OWASP crAPI
 
