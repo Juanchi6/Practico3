@@ -6,7 +6,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 
 | Aplicación | Resueltos | Requeridos |
 | --- | ---: | ---: |
-| Juice Shop | 1 | 5 |
+| Juice Shop | 2 | 5 |
 | crAPI | 0 | 5 |
 
 ## OWASP Juice Shop
@@ -28,6 +28,23 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 ![Solicitud con rating 0 y respuesta HTTP 201](evidencias/juice-shop/j1-zero-stars.png)
 
 **Mitigación:** validar también del lado del servidor que `rating` sea un entero dentro del rango permitido (1–5) y rechazar los demás valores con un error 400.
+
+### J2 — Login Admin
+
+**Vulnerabilidad:** SQL Injection en el inicio de sesión: el correo introducido modifica la consulta SQL y permite omitir la comprobación de contraseña.
+
+**Clasificación:** OWASP Top 10 2021 — A03: Injection.
+
+**Prueba de concepto:**
+1. Abrí el formulario `Login`.
+2. Ingresé `admin@juice-sh.op'--` como correo y `prueba123` como contraseña.
+3. El inicio de sesión devolvió **HTTP 200** y Juice Shop confirmó el desafío *Login Admin*.
+
+**Evidencia:** la solicitud de inicio de sesión con el valor ingresado y la respuesta HTTP 200.
+
+![Solicitud SQL Injection y HTTP 200](evidencias/juice-shop/j2-login-admin-request.png)
+
+**Mitigación:** utilizar consultas SQL parametrizadas y validar los datos de entrada; nunca concatenar valores del usuario directamente en una consulta de autenticación.
 
 ## OWASP crAPI
 
