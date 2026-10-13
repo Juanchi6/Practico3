@@ -156,7 +156,7 @@ Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local 
 **Clasificación:** OWASP API Security Top 10 2023 — API7: Server Side Request Forgery.
 
 **Prueba de concepto:**
-1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé `POST /workshop/api/merchant/contact_mechanic` en Firefox Network.
+1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé la solicitud `POST contact_mechanic` en Firefox Network.
 2. Con `Edit and Resend`, modifiqué únicamente `mechanic_api` para que apuntara a `https://www.google.com`, conservando los demás parámetros y la sesión.
 3. La respuesta devolvió `status: 200` y el campo `response_from_mechanic_api` contenía HTML de Google, comenzando por `<!doctype html>`. Esto evidencia que el backend consultó un destino elegido por el cliente.
 
