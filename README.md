@@ -1,33 +1,38 @@
 # Práctico 3 — Desarrollo Seguro de Software
 
-Informe de al menos cinco desafíos de OWASP Juice Shop y cinco de OWASP crAPI, realizados en un laboratorio local en Kali Linux.
+Pruebas realizadas sobre OWASP Juice Shop y OWASP crAPI en un laboratorio local de Kali Linux.
 
 ## Avance
 
-| Aplicación | Desafíos resueltos y documentados | Mínimo requerido |
-| --- | --- | --- |
-| OWASP Juice Shop | 0 | 5 |
-| OWASP crAPI | 0 | 5 |
+| Aplicación | Resueltos | Requeridos |
+| --- | ---: | ---: |
+| Juice Shop | 1 | 5 |
+| crAPI | 0 | 5 |
 
-## Entorno
+## OWASP Juice Shop
 
-- Kali Linux: versión pendiente de verificar.
-- OWASP Juice Shop: versión pendiente de verificar.
-- OWASP crAPI: versión pendiente de verificar.
+### J1 — Zero Stars
 
-## Desafíos
+**Vulnerabilidad:** validación insuficiente del valor de la calificación. El formulario limita los valores disponibles, pero el servidor aceptó una calificación de cero.
 
-Se incorporará cada desafío después de verificar su resultado y sus evidencias. Cada ejercicio incluirá únicamente:
+**Clasificación:** OWASP Top 10 2021 — A04: Insecure Design (validación de reglas de negocio insuficiente).
 
-1. Nombre del desafío.
-2. Vulnerabilidad y categoría OWASP, indicando la edición utilizada.
-3. Pasos concretos para reproducir la explotación.
-4. Evidencias del resultado.
-5. Explicación breve de por qué fue posible.
-6. Mitigación concreta.
+**Prueba de concepto:**
+1. Abrí `Customer Feedback` y envié un comentario con una estrella.
+2. En las herramientas de Firefox (`Network`), identifiqué `POST /api/Feedbacks/`.
+3. Utilicé `Edit and Resend` y cambié `rating: 1` por `rating: 0`, conservando los otros campos.
+4. El servidor respondió **HTTP 201 Created**, aceptando la valoración de cero estrellas.
 
-Las capturas se guardarán en `evidencias/juice-shop/` y `evidencias/crapi/`, dentro de una carpeta por desafío, y se enlazarán desde este informe.
+**Evidencia:**
+
+![Solicitud con rating 0 y respuesta HTTP 201](evidencias/juice-shop/j1-zero-stars.png)
+
+**Mitigación:** validar también del lado del servidor que `rating` sea un entero dentro del rango permitido (1–5) y rechazar los demás valores con un error 400.
+
+## OWASP crAPI
+
+_Pendiente._
 
 ## Entrega
 
-Un único ZIP con este informe y las evidencias utilizadas.
+Un único ZIP con este `README.md` y las evidencias enlazadas.
