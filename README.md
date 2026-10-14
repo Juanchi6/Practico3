@@ -129,7 +129,7 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 
 **Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: falta la regla de negocio que exige cantidades positivas antes de calcular el importe de una compra.
 
-**Relación con la consigna:** el objetivo de C3 es obtener un artículo gratis. Aunque el enunciado menciona una devolución, la prueba usa una cantidad negativa en una compra: se registra un artículo y el importe resulta negativo en lugar de cobrarse. Esta variante aparece en la [solución oficial del desafío 8 de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-8---get-an-item-for-free).
+**Relación con la consigna:** se utilizó la variante de cantidades negativas documentada en la [solución oficial del desafío 8 de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-8---get-an-item-for-free). La aplicación registra un pedido cuyo importe es negativo en lugar de cobrar el precio del artículo. Esta prueba aborda el objetivo de obtener un artículo sin pagar un importe positivo mediante una compra manipulada; no utiliza el flujo de devolución mencionado en el enunciado.
 
 **Prueba de concepto:**
 
@@ -151,15 +151,20 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 
 **Clasificación:** OWASP Top 10 2021 — A04: Insecure Design: el cálculo del movimiento de saldo carece de una validación de las reglas de compra.
 
-**Relación con la consigna:** el objetivo de C4 es aumentar el saldo al menos $1.000. Se aprovechó la misma falla de C3, usando una cantidad negativa mayor, como propone la [solución oficial del desafío 9 de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-9---increase-your-balance-by-1000-or-more). No se utilizó el flujo de devolución mencionado en el enunciado.
+**Relación con la consigna:** se utilizó la variante de cantidades negativas documentada en la [solución oficial del desafío 9 de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challengeSolutions.md#challenge-9---increase-your-balance-by-1000-or-more). C3 y C4 aprovechan la misma falla para dos objetivos distintos: registrar un pedido sin pagar un importe positivo y aumentar el saldo al menos $1.000. En C4 se amplía la magnitud de la cantidad negativa. El procedimiento realizado no utiliza una devolución.
 
 **Prueba de concepto:**
 
 1. Capturé una compra normal de Seat (`product_id: 1`, precio $10).
 2. Reenvié `POST /workshop/api/shop/orders` con `{"product_id":1,"quantity":-101}`.
-3. Tras la prueba, la aplicación mostró un saldo de **$1.090**. Una cantidad de `-101` a $10 genera un importe de **−$1.010**, que se suma al saldo al descontarlo.
+3. Tras la prueba, la aplicación mostró un saldo de **$1.090**. El efecto de la cantidad enviada se explica con el siguiente cálculo:
 
-**Evidencia y alcance:** la captura muestra `quantity: -101` en el editor y un saldo final de **$1.090**. El cálculo explica el crédito de $1.010, pero la imagen no muestra el saldo previo ni la respuesta de la solicitud. Por eso, el incremento exacto se explica con el procedimiento y el cálculo, no con una comparación visual de dos saldos.
+   - Importe de la compra: `$10 × (−101) = −$1.010`.
+   - Movimiento de saldo: `saldo posterior = saldo anterior − (−$1.010) = saldo anterior + $1.010`.
+
+   El cálculo describe el crédito que produce la operación con esos valores; el saldo final registrado se conserva en la captura.
+
+**Evidencia y alcance:** la captura conserva el saldo final de **$1.090** y el cuerpo de solicitud con `quantity: -101`. El cálculo del crédito de $1.010 explica el mecanismo y amplía la falla demostrada en C3. La evidencia conservada no incluye el saldo previo ni la respuesta de esta operación, por lo que no permite comprobar de manera independiente el incremento exacto mediante una comparación antes/después.
 
 ![Saldo de $1090 y cuerpo con cantidad -101 en el editor de solicitudes](evidencias/crapi/c4-aumento-saldo.png)
 
@@ -175,7 +180,7 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 
 1. En `Dashboard → Contact Mechanic`, envié un reporte de prueba y localicé la solicitud `POST /workshop/api/merchant/contact_mechanic` en Firefox Network.
 2. Con `Edit and Resend`, modifiqué únicamente `mechanic_api` para que apuntara a `https://www.google.com`, conservando los demás parámetros y la sesión.
-3. La respuesta incluyó `status: 200` y contenido HTML de Google en `response_from_mechanic_api`. El HTML devuelto —no la etiqueta `<!doctype html>` por sí sola— indica que crAPI realizó una solicitud al destino indicado por el cliente.
+3. La respuesta incluyó `status: 200` y contenido HTML identificable de Google en `response_from_mechanic_api`: se observan `<title>Google</title>` y referencias a recursos del sitio. Esto respalda el resultado de la solicitud que realizó crAPI al destino indicado en el procedimiento.
 
 **Evidencia y alcance:** se ve la respuesta con HTML de Google y estado 200. La captura no muestra el valor enviado en `mechanic_api`, por lo que ese cambio queda descrito en los pasos reproducibles.
 
@@ -208,6 +213,6 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 - [OWASP Top 10 2021 — A04: Insecure Design](https://top10.owasp.org/2021/A04_2021-Insecure_Design/): referencia para los defectos de reglas de negocio de J1, J7, C3 y C4.
 - [OWASP API Security Top 10 2019 — API8: Injection](https://api-security.owasp.org/editions/2019/en/0xa8-injection/): referencia para la clasificación de C6.
 
-## Entrega
+## Contenido de la entrega
 
-Entregar un único archivo ZIP o 7ZIP que contenga este `README.md` y la carpeta `evidencias/`, conservando las rutas relativas para visualizar las trece capturas. También puede entregarse un único informe que incorpore las imágenes, de acuerdo con la consigna.
+El archivo ZIP contiene este informe (`README.md`) y la carpeta `evidencias/` con las trece capturas originales. Las rutas relativas se conservan. Para leer el informe junto con sus imágenes, extraer el ZIP completo y abrir `README.md` en un visor de Markdown, o consultar su versión en el repositorio.
