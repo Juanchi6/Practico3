@@ -212,7 +212,3 @@ Los identificadores de cuentas, carritos, vehículos y pedidos corresponden al e
 - [Desafíos oficiales de crAPI](https://github.com/OWASP/crAPI/blob/develop/docs/challenges.md): los casos C1, C3, C4, C5 y C6 de la consigna corresponden a los desafíos oficiales 1, 8, 9, 11 y 12, respectivamente.
 - [OWASP Top 10 2021 — A04: Insecure Design](https://top10.owasp.org/2021/A04_2021-Insecure_Design/): referencia para los defectos de reglas de negocio de J1, J7, C3 y C4.
 - [OWASP API Security Top 10 2019 — API8: Injection](https://api-security.owasp.org/editions/2019/en/0xa8-injection/): referencia para la clasificación de C6.
-
-## Contenido de la entrega
-
-El archivo ZIP contiene este informe (`README.md`) y la carpeta `evidencias/` con las trece capturas originales. Las rutas relativas se conservan. Para leer el informe junto con sus imágenes, extraer el ZIP completo y abrir `README.md` en un visor de Markdown, o consultar su versión en el repositorio.
